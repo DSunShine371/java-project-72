@@ -42,6 +42,7 @@ val hikariCpVersion = "6.3.0"
 val h2databaseVersion = "2.3.232"
 val jteVersion = "3.2.1"
 val assertjCoreVersion = "3.27.4"
+val jettyHttp2Version = "11.0.26"
 
 dependencies {
     implementation("org.apache.commons:commons-lang3:$lang3Version")
@@ -58,6 +59,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:$hikariCpVersion")
     implementation("com.h2database:h2:$h2databaseVersion")
     implementation("gg.jte:jte:$jteVersion")
+    implementation("org.eclipse.jetty.http2:http2-common:$jettyHttp2Version")
 
     testImplementation(platform("org.junit:junit-bom:$junitBomVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -90,6 +92,7 @@ sonar {
         property("sonar.organization", "dsunshine371pis")
         property("sonar.sources", "src/main/java")
         property("sonar.tests", "src/test/java")
-        property("sonar.coverage.exclusions", "**/App.java")
+        property("sonar.coverage.exclusions", "**/App.java:getPort")
+        property("sonar.coverage.exclusions", "**/App.java:main")
     }
 }
