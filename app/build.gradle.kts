@@ -41,6 +41,7 @@ val javalinVersion = "6.7.0"
 val hikariCpVersion = "6.3.0"
 val h2databaseVersion = "2.3.232"
 val jteVersion = "3.2.1"
+val assertjCoreVersion = "3.27.4"
 
 dependencies {
     implementation("org.apache.commons:commons-lang3:$lang3Version")
@@ -68,6 +69,7 @@ dependencies {
     testImplementation("org.slf4j:slf4j-jdk14:$slf4jJdk14Version")
     testImplementation("org.slf4j:slf4j-simple:$slf4jSimpleVersion")
     testImplementation("io.javalin:javalin:$javalinVersion")
+    testImplementation("org.assertj:assertj-core:$assertjCoreVersion")
 }
 
 tasks {
@@ -86,5 +88,7 @@ sonar {
     properties {
         property("sonar.projectKey", "DSunShine371_java-project-722")
         property("sonar.organization", "dsunshine371pis")
+        property("sonar.sources", "src/main/java")
+        property("sonar.tests", "src/test/java")
     }
 }
