@@ -43,6 +43,7 @@ val h2databaseVersion = "2.3.232"
 val jteVersion = "3.2.1"
 val assertjCoreVersion = "3.27.4"
 val jettyHttp2Version = "11.0.26"
+val postgresqlVersion = "42.7.7"
 
 dependencies {
     implementation("org.apache.commons:commons-lang3:$lang3Version")
@@ -60,6 +61,7 @@ dependencies {
     implementation("com.h2database:h2:$h2databaseVersion")
     implementation("gg.jte:jte:$jteVersion")
     implementation("org.eclipse.jetty.http2:http2-common:$jettyHttp2Version")
+    implementation("org.postgresql:postgresql:$postgresqlVersion")
 
     testImplementation(platform("org.junit:junit-bom:$junitBomVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
