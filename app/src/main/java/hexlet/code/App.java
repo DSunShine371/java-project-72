@@ -5,17 +5,31 @@ import com.zaxxer.hikari.HikariDataSource;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.dto.BasePage;
+import hexlet.code.dto.urls.UrlPage;
+import hexlet.code.dto.urls.UrlsPage;
+import hexlet.code.model.Url;
 import hexlet.code.repository.BaseRepository;
+import hexlet.code.repository.UrlRepository;
 import io.javalin.Javalin;
+import io.javalin.http.NotFoundResponse;
 import io.javalin.rendering.template.JavalinJte;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static io.javalin.rendering.template.TemplateUtil.model;
 
 @Slf4j
 public class App {
@@ -71,9 +85,60 @@ public class App {
         var app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();
             config.fileRenderer(new JavalinJte(createTemplateEngine()));
+            config.router.ignoreTrailingSlashes = true;
         });
 
-        app.get("/", ctx -> ctx.render("index.jte"));
+        app.get("/", ctx -> {
+            var page = new BasePage();
+            page.setFlash(ctx.consumeSessionAttribute("flash"));
+            ctx.render("index.jte", model("page", page));
+        });
+
+        app.post("/urls", ctx -> {
+            String name = ctx.formParam("url");
+
+            if (name == null || name.isBlank()) {
+                ctx.sessionAttribute("flash", "URL не может быть пустым");
+                ctx.redirect("/");
+                return;
+            }
+
+            try {
+                URL parsedUrl = new URI(name).toURL();
+                String normalizedUrl = parsedUrl.getProtocol() + "://" + parsedUrl.getAuthority();
+
+                if (UrlRepository.findByName(normalizedUrl).isPresent()) {
+                    ctx.sessionAttribute("flash", "Страница уже существует");
+                } else {
+                    Url url = new Url(normalizedUrl);
+                    UrlRepository.save(url);
+                    ctx.sessionAttribute("flash", "Страница успешно добавлена");
+                }
+                ctx.redirect("/urls");
+            } catch (MalformedURLException | URISyntaxException | SQLException | IllegalArgumentException e) {
+                ctx.sessionAttribute("flash", "Некорректный URL");
+                ctx.redirect("/");
+            }
+        });
+
+        app.get("/urls", ctx -> {
+            List<Url> urls = UrlRepository.getAll();
+            var page = new UrlsPage(urls);
+            page.setFlash(ctx.consumeSessionAttribute("flash"));
+            ctx.render("urls/index.jte", model("page", page));
+        });
+
+        app.get("/urls/{id}", ctx -> {
+            long id = ctx.pathParamAsClass("id", Long.class).get();
+            Optional<Url> url = UrlRepository.findById(id);
+            if (url.isPresent()) {
+                var page = new UrlPage(url.get());
+                page.setFlash(ctx.consumeSessionAttribute("flash"));
+                ctx.render("urls/show.jte", model("page", page));
+            } else {
+                throw new NotFoundResponse("URL not found");
+            }
+        });
 
         return app;
     }
