@@ -32,7 +32,7 @@ public class UrlRepository extends BaseRepository {
     }
 
     public static Optional<Url> findByName(String name) throws SQLException {
-        String sql = "SELECT * FROM urls WHERE name = ?";
+        String sql = "SELECT * FROM urls WHERE name = ? ORDER BY id DESC";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
@@ -52,7 +52,7 @@ public class UrlRepository extends BaseRepository {
     }
 
     public static List<Url> getAll() throws SQLException {
-        String sql = "SELECT * FROM urls";
+        String sql = "SELECT * FROM urls ORDER BY id DESC";
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
             ResultSet resultSet = stmt.executeQuery(sql);
@@ -71,7 +71,7 @@ public class UrlRepository extends BaseRepository {
     }
 
     public static Optional<Url> findById(Long id) throws SQLException {
-        String sql = "SELECT * FROM urls WHERE id = ?";
+        String sql = "SELECT * FROM urls WHERE id = ? ORDER BY id DESC";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
