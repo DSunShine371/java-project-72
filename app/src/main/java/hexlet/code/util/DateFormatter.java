@@ -6,12 +6,11 @@ import java.util.Locale;
 
 public class DateFormatter {
 
-    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-
     public static String formatTimestamp(Timestamp timestamp) {
         if (timestamp == null) {
             return "";
         }
-        return FORMATTER.format(timestamp);
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        return formatter.format(timestamp);
     }
 }
