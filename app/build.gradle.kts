@@ -32,9 +32,7 @@ val collections4Version = "4.4"
 val picocliVersion = "4.7.6"
 val jacksonDatabindVersion = "2.19.1"
 val jacksonDataformatYamlVersion = "2.17.1"
-val slf4jApiVersion = "2.0.17"
-val slf4jJdk14Version = "2.0.17"
-val junitBomVersion = "5.12.1"
+val junitVersion = "5.13.4"
 val junitPlatformLauncherVersion = "1.12.1"
 val slf4jSimpleVersion = "2.0.17"
 val javalinVersion = "6.7.0"
@@ -44,6 +42,9 @@ val jteVersion = "3.2.1"
 val assertjCoreVersion = "3.27.4"
 val jettyHttp2Version = "11.0.26"
 val postgresqlVersion = "42.7.7"
+val unirestJavaVersion = "3.14.5"
+val jsoupVersion = "1.21.2"
+val mockWebServerVersion = "4.12.0"
 
 dependencies {
     implementation("org.apache.commons:commons-lang3:$lang3Version")
@@ -51,8 +52,6 @@ dependencies {
     implementation("info.picocli:picocli:$picocliVersion")
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonDataformatYamlVersion")
-    implementation("org.slf4j:slf4j-api:$slf4jApiVersion")
-    implementation("org.slf4j:slf4j-jdk14:$slf4jJdk14Version")
     implementation("org.slf4j:slf4j-simple:$slf4jSimpleVersion")
     implementation("io.javalin:javalin:$javalinVersion")
     implementation("io.javalin:javalin-bundle:$javalinVersion")
@@ -62,18 +61,17 @@ dependencies {
     implementation("gg.jte:jte:$jteVersion")
     implementation("org.eclipse.jetty.http2:http2-common:$jettyHttp2Version")
     implementation("org.postgresql:postgresql:$postgresqlVersion")
+    implementation("com.konghq:unirest-java:$unirestJavaVersion")
+    implementation("org.jsoup:jsoup:$jsoupVersion")
 
-    testImplementation(platform("org.junit:junit-bom:$junitBomVersion"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("org.junit.platform:junit-platform-launcher:$junitPlatformLauncherVersion")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")
     testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonDataformatYamlVersion")
-    testImplementation("org.slf4j:slf4j-api:$slf4jApiVersion")
-    testImplementation("org.slf4j:slf4j-jdk14:$slf4jJdk14Version")
     testImplementation("org.slf4j:slf4j-simple:$slf4jSimpleVersion")
     testImplementation("io.javalin:javalin:$javalinVersion")
     testImplementation("org.assertj:assertj-core:$assertjCoreVersion")
+    testImplementation("com.squareup.okhttp3:mockwebserver:$mockWebServerVersion")
 }
 
 tasks {

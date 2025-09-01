@@ -9,12 +9,19 @@ import hexlet.code.dto.BasePage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.model.Url;
+import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.BaseRepository;
+import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
 import io.javalin.Javalin;
 import io.javalin.http.NotFoundResponse;
 import io.javalin.rendering.template.JavalinJte;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -88,6 +95,9 @@ public class App {
             config.router.ignoreTrailingSlashes = true;
         });
 
+        Unirest.config().reset();
+        Unirest.config().connectTimeout(10000).socketTimeout(10000);
+
         app.get("/", ctx -> {
             var page = new BasePage();
             page.setFlash(ctx.consumeSessionAttribute("flash"));
@@ -123,6 +133,15 @@ public class App {
 
         app.get("/urls", ctx -> {
             List<Url> urls = UrlRepository.getAll();
+            for (Url url : urls) {
+                Optional<UrlCheck> lastCheckOptional = UrlCheckRepository.findLatestCheckByUrlId(url.getId());
+
+                lastCheckOptional.ifPresent(check -> {
+                    url.setLastCheckCreatedAt(check.getCreatedAt());
+                    url.setLastCheckStatusCode(check.getStatusCode());
+                });
+            }
+
             var page = new UrlsPage(urls);
             page.setFlash(ctx.consumeSessionAttribute("flash"));
             ctx.render("urls/index.jte", model("page", page));
@@ -132,11 +151,42 @@ public class App {
             long id = ctx.pathParamAsClass("id", Long.class).get();
             Optional<Url> url = UrlRepository.findById(id);
             if (url.isPresent()) {
-                var page = new UrlPage(url.get());
+                List<UrlCheck> urlChecks = UrlCheckRepository.findAllByUrlId(id);
+                var page = new UrlPage(url.get(), urlChecks);
                 page.setFlash(ctx.consumeSessionAttribute("flash"));
                 ctx.render("urls/show.jte", model("page", page));
             } else {
                 throw new NotFoundResponse("URL not found");
+            }
+        });
+
+        app.post("/urls/{id}/checks", ctx -> {
+            long urlId = ctx.pathParamAsClass("id", Long.class).get();
+            Url url = UrlRepository.findById(urlId)
+                    .orElseThrow(() -> new NotFoundResponse("URL не найден"));
+
+            try {
+                HttpResponse<String> response = Unirest.get(url.getName()).asString();
+                Integer statusCode = response.getStatus();
+
+                Document doc = Jsoup.parse(response.getBody());
+                String title = doc.title();
+                String h1 = Optional.ofNullable(doc.selectFirst("h1"))
+                        .map(Element::text)
+                        .orElse("");
+                String description = Optional.ofNullable(doc.selectFirst("meta[name=description]"))
+                        .map(element -> element.attr("content"))
+                        .orElse("");
+
+                UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, urlId);
+                UrlCheckRepository.save(urlCheck);
+
+                ctx.sessionAttribute("flash", "Страница успешно проверена");
+                ctx.redirect("/urls/" + urlId);
+
+            } catch (Exception e) {
+                ctx.sessionAttribute("flash", "Не удалось проверить страницу");
+                ctx.redirect("/urls/" + urlId);
             }
         });
 

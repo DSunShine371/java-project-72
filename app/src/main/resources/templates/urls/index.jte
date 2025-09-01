@@ -1,3 +1,4 @@
+@import hexlet.code.util.DateFormatter
 @import hexlet.code.dto.urls.UrlsPage
 @param UrlsPage page
 
@@ -11,20 +12,32 @@ content = @`
             <tr>
                 <th>ID</th>
                 <th>Имя</th>
-                <th>Дата создания</th>
+                <th>Последняя проверка</th>
+                <th>Код ответа</th>
+                <th>Дата добавления</th>
             </tr>
             </thead>
             <tbody>
             @if (page.getUrls() == null || page.getUrls().isEmpty())
                 <tr>
-                    <td colspan="3" class="text-center">Сайтов пока нет</td>
+                    <td colspan="5" class="text-center">Сайтов пока нет</td>
                 </tr>
             @else
                 @for (var url : page.getUrls())
                     <tr>
                         <td>${url.getId()}</td>
                         <td><a href="/urls/${url.getId()}">${url.getName()}</a></td>
-                        <td>${url.getCreatedAt().toString()}</td>
+                        <td>
+                            @if (url.getLastCheckTime().isPresent())
+                                ${DateFormatter.formatTimestamp(url.getLastCheckTime().get())}
+                            @endif
+                        </td>
+                        <td>
+                            @if (url.getLastCheckStatus().isPresent())
+                                ${url.getLastCheckStatus().get()}
+                            @endif
+                        </td>
+                        <td>${DateFormatter.formatTimestamp(url.getCreatedAt())}</td>
                     </tr>
                 @endfor
             @endif

@@ -36,11 +36,11 @@ public class UrlRepository extends BaseRepository {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    long id = rs.getLong("id");
-                    String urlName = rs.getString("name");
-                    Timestamp createdAt = rs.getTimestamp("created_at");
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    long id = resultSet.getLong("id");
+                    String urlName = resultSet.getString("name");
+                    Timestamp createdAt = resultSet.getTimestamp("created_at");
                     Url url = new Url(urlName);
                     url.setId(id);
                     url.setCreatedAt(createdAt);
@@ -55,12 +55,12 @@ public class UrlRepository extends BaseRepository {
         String sql = "SELECT * FROM urls";
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
-            ResultSet rs = stmt.executeQuery(sql);
+            ResultSet resultSet = stmt.executeQuery(sql);
             List<Url> urls = new ArrayList<>();
-            while (rs.next()) {
-                long id = rs.getLong("id");
-                String name = rs.getString("name");
-                Timestamp createdAt = rs.getTimestamp("created_at");
+            while (resultSet.next()) {
+                long id = resultSet.getLong("id");
+                String name = resultSet.getString("name");
+                Timestamp createdAt = resultSet.getTimestamp("created_at");
                 Url url = new Url(name);
                 url.setId(id);
                 url.setCreatedAt(createdAt);
@@ -75,10 +75,10 @@ public class UrlRepository extends BaseRepository {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String name = rs.getString("name");
-                    Timestamp createdAt = rs.getTimestamp("created_at");
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    String name = resultSet.getString("name");
+                    Timestamp createdAt = resultSet.getTimestamp("created_at");
                     Url url = new Url(name);
                     url.setId(id);
                     url.setCreatedAt(createdAt);

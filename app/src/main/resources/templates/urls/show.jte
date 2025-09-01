@@ -1,3 +1,4 @@
+@import hexlet.code.util.DateFormatter
 @import hexlet.code.dto.urls.UrlPage
 @param UrlPage page
 
@@ -24,8 +25,41 @@ content = @`
             </tr>
             <tr>
                 <th scope="row">Дата создания</th>
-                <td>${page.getUrl().getCreatedAt().toString()}</td>
+                <td>${DateFormatter.formatTimestamp(page.getUrl().getCreatedAt())}</td>
             </tr>
+            </tbody>
+        </table>
+
+        <h2 class="mt-5 mb-4">Проверки</h2>
+        <div class="mb-3">
+            <form action="/urls/${page.getUrl().getId()}/checks" method="post">
+                <button type="submit" class="btn btn-primary">Запустить проверку</button>
+            </form>
+        </div>
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Код ответа</th>
+                <th scope="col">title</th>
+                <th scope="col">h1</th>
+                <th scope="col">description</th>
+                <th scope="col">Дата проверки</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (page.getUrlChecks() != null && !page.getUrlChecks().isEmpty())
+                @for (var check : page.getUrlChecks())
+                    <tr>
+                        <td>${check.getId()}</td>
+                        <td>${check.getStatusCode()}</td>
+                        <td>${check.getTitle()}</td>
+                        <td>${check.getH1()}</td>
+                        <td>${check.getDescription()}</td>
+                        <td>${DateFormatter.formatTimestamp(check.getCreatedAt())}</td>
+                    </tr>
+                @endfor
+            @endif
             </tbody>
         </table>
     </div>
