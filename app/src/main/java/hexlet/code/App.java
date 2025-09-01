@@ -49,7 +49,7 @@ public class App {
 
     private static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");
-        return Integer.valueOf(port);
+        return Integer.parseInt(port);
     }
 
     private static String readResourceFile(String fileName) throws IOException {
