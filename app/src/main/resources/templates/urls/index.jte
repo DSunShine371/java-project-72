@@ -1,5 +1,6 @@
 @import hexlet.code.util.DateFormatter
 @import hexlet.code.dto.urls.UrlsPage
+@import hexlet.code.util.NamedRoutes
 @param UrlsPage page
 
 @template.layout.page(
@@ -26,7 +27,7 @@ content = @`
                 @for (var url : page.getUrls())
                     <tr>
                         <td>${url.getId()}</td>
-                        <td><a href="/urls/${url.getId()}">${url.getName()}</a></td>
+                        <td><a href="${NamedRoutes.urlPath(url.getId())}">${url.getName()}</a></td>
                         <td>
                             @if (url.getLastCheckTime().isPresent())
                                 ${DateFormatter.formatTimestamp(url.getLastCheckTime().get())}

@@ -1,5 +1,6 @@
 @import hexlet.code.dto.BasePage
 @import gg.jte.Content
+@import hexlet.code.util.NamedRoutes
 
 @param Content content
 @param BasePage page = null
@@ -25,10 +26,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="/">Главная</a>
+                    <a class="nav-link" href="${NamedRoutes.mainPagePath()}">Главная</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/urls">Сайты</a>
+                    <a class="nav-link" href="${NamedRoutes.urlsPath()}">Сайты</a>
                 </li>
             </ul>
         </div>
@@ -48,7 +49,7 @@
 
 <footer class="footer mt-auto py-3 bg-light">
     <div class="container text-center">
-        <span class="text-muted">created by <a href="https://hexlet.io" target="_blank">Hexlet</a></span>
+        <span class="text-muted">created by <a href="https://github.com/DSunShine371" target="_blank">DSunShine371</a></span>
     </div>
 </footer>
 

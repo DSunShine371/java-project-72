@@ -5,38 +5,24 @@ import com.zaxxer.hikari.HikariDataSource;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
-import hexlet.code.dto.BasePage;
-import hexlet.code.dto.urls.UrlPage;
-import hexlet.code.dto.urls.UrlsPage;
-import hexlet.code.model.Url;
-import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.BaseRepository;
-import hexlet.code.repository.UrlCheckRepository;
-import hexlet.code.repository.UrlRepository;
+import hexlet.code.controller.UrlController;
 import io.javalin.Javalin;
-import io.javalin.http.NotFoundResponse;
 import io.javalin.rendering.template.JavalinJte;
-import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.javalin.rendering.template.TemplateUtil.model;
+import static hexlet.code.util.NamedRoutes.mainPagePath;
+import static hexlet.code.util.NamedRoutes.urlChecksPath;
+import static hexlet.code.util.NamedRoutes.urlPath;
+import static hexlet.code.util.NamedRoutes.urlsPath;
 
 @Slf4j
 public class App {
@@ -98,97 +84,12 @@ public class App {
         Unirest.config().reset();
         Unirest.config().connectTimeout(10000).socketTimeout(10000);
 
-        app.get("/", ctx -> {
-            var page = new BasePage();
-            page.setFlash(ctx.consumeSessionAttribute("flash"));
-            ctx.render("index.jte", model("page", page));
-        });
-
-        app.post("/urls", ctx -> {
-            String name = ctx.formParam("url");
-
-            if (name == null || name.isBlank()) {
-                ctx.sessionAttribute("flash", "URL не может быть пустым");
-                ctx.redirect("/");
-                return;
-            }
-
-            try {
-                URL parsedUrl = new URI(name).toURL();
-                String normalizedUrl = parsedUrl.getProtocol() + "://" + parsedUrl.getAuthority();
-
-                if (UrlRepository.findByName(normalizedUrl).isPresent()) {
-                    ctx.sessionAttribute("flash", "Страница уже существует");
-                } else {
-                    Url url = new Url(normalizedUrl);
-                    UrlRepository.save(url);
-                    ctx.sessionAttribute("flash", "Страница успешно добавлена");
-                }
-                ctx.redirect("/urls");
-            } catch (MalformedURLException | URISyntaxException | SQLException | IllegalArgumentException e) {
-                ctx.sessionAttribute("flash", "Некорректный URL");
-                ctx.redirect("/");
-            }
-        });
-
-        app.get("/urls", ctx -> {
-            List<Url> urls = UrlRepository.getAll();
-            for (Url url : urls) {
-                Optional<UrlCheck> lastCheckOptional = UrlCheckRepository.findLatestCheckByUrlId(url.getId());
-
-                lastCheckOptional.ifPresent(check -> {
-                    url.setLastCheckCreatedAt(check.getCreatedAt());
-                    url.setLastCheckStatusCode(check.getStatusCode());
-                });
-            }
-
-            var page = new UrlsPage(urls);
-            page.setFlash(ctx.consumeSessionAttribute("flash"));
-            ctx.render("urls/index.jte", model("page", page));
-        });
-
-        app.get("/urls/{id}", ctx -> {
-            long id = ctx.pathParamAsClass("id", Long.class).get();
-            Optional<Url> url = UrlRepository.findById(id);
-            if (url.isPresent()) {
-                List<UrlCheck> urlChecks = UrlCheckRepository.findAllByUrlId(id);
-                var page = new UrlPage(url.get(), urlChecks);
-                page.setFlash(ctx.consumeSessionAttribute("flash"));
-                ctx.render("urls/show.jte", model("page", page));
-            } else {
-                throw new NotFoundResponse("URL not found");
-            }
-        });
-
-        app.post("/urls/{id}/checks", ctx -> {
-            long urlId = ctx.pathParamAsClass("id", Long.class).get();
-            Url url = UrlRepository.findById(urlId)
-                    .orElseThrow(() -> new NotFoundResponse("URL не найден"));
-
-            try {
-                HttpResponse<String> response = Unirest.get(url.getName()).asString();
-                Integer statusCode = response.getStatus();
-
-                Document doc = Jsoup.parse(response.getBody());
-                String title = doc.title();
-                String h1 = Optional.ofNullable(doc.selectFirst("h1"))
-                        .map(Element::text)
-                        .orElse("");
-                String description = Optional.ofNullable(doc.selectFirst("meta[name=description]"))
-                        .map(element -> element.attr("content"))
-                        .orElse("");
-
-                UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, urlId);
-                UrlCheckRepository.save(urlCheck);
-
-                ctx.sessionAttribute("flash", "Страница успешно проверена");
-                ctx.redirect("/urls/" + urlId);
-
-            } catch (Exception e) {
-                ctx.sessionAttribute("flash", "Не удалось проверить страницу");
-                ctx.redirect("/urls/" + urlId);
-            }
-        });
+        var urlController = new UrlController();
+        app.get(mainPagePath(), urlController::showMainPage);
+        app.post(urlsPath(), urlController::createUrl);
+        app.get(urlsPath(), urlController::indexUrls);
+        app.get(urlPath("{id}"), urlController::showUrl);
+        app.post(urlChecksPath("{id}"), urlController::indexUrlChecks);
 
         return app;
     }
