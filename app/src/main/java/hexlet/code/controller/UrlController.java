@@ -103,26 +103,17 @@ public class UrlController {
             HttpResponse<String> response = Unirest.get(url.getName()).asString();
             Integer statusCode = response.getStatus();
 
-            String body = response.getBody();
-            if (statusCode >= 400) {
-                UrlCheck urlCheck = new UrlCheck(statusCode, "", "", "", urlId);
-                UrlCheckRepository.save(urlCheck);
-            } else {
-                if (body == null || body.isBlank()) {
-                    throw new IllegalStateException("Empty response body");
-                }
-                Document doc = Jsoup.parse(body);
-                String title = doc.title();
-                String h1 = Optional.ofNullable(doc.selectFirst("h1"))
-                        .map(Element::text)
-                        .orElse("");
-                String description = Optional.ofNullable(doc.selectFirst("meta[name=description]"))
-                        .map(element -> element.attr("content"))
-                        .orElse("");
+            Document doc = Jsoup.parse(response.getBody());
+            String title = doc.title();
+            String h1 = Optional.ofNullable(doc.selectFirst("h1"))
+                    .map(Element::text)
+                    .orElse("");
+            String description = Optional.ofNullable(doc.selectFirst("meta[name=description]"))
+                    .map(element -> element.attr("content"))
+                    .orElse("");
 
-                UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, urlId);
-                UrlCheckRepository.save(urlCheck);
-            }
+            UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, urlId);
+            UrlCheckRepository.save(urlCheck);
 
             ctx.sessionAttribute(flash, "Страница успешно проверена");
             ctx.redirect(urlPath(urlId));

@@ -19,6 +19,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import static hexlet.code.util.NamedRoutes.mainPagePath;
+import static hexlet.code.util.NamedRoutes.urlChecksPath;
+import static hexlet.code.util.NamedRoutes.urlPath;
+import static hexlet.code.util.NamedRoutes.urlsPath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AppTest {
@@ -57,7 +61,7 @@ class AppTest {
     @Test
     void testMainPage() {
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/");
+            var response = client.get(mainPagePath());
             assertThat(response.code()).isEqualTo(200);
             assertThat(response.body()).isNotNull();
             assertThat(response.body().string()).contains("Анализатор страниц");
@@ -78,7 +82,7 @@ class AppTest {
         UrlRepository.save(url);
 
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls/" + url.getId());
+            var response = client.get(urlPath(url.getId()));
             assertThat(response.code()).isEqualTo(200);
             assertThat(response.body()).isNotNull();
             assertThat(response.body().string()).contains("https://www.example.com");
@@ -88,7 +92,7 @@ class AppTest {
     @Test
     void testUrlNotFound() {
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls/9999");
+            var response = client.get(urlPath(9999L));
             assertThat(response.code()).isEqualTo(404);
         });
     }
@@ -97,7 +101,7 @@ class AppTest {
     void testCreateValidUrl() {
         JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=https://www.test.com";
-            var response = client.post("/urls", requestBody);
+            var response = client.post(urlsPath(), requestBody);
 
             assertThat(response.code()).isEqualTo(200);
             assertThat(UrlRepository.findByName("https://www.test.com")).isPresent();
@@ -108,7 +112,7 @@ class AppTest {
     void testCreateInvalidUrl() {
         JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=invalid-url";
-            var response = client.post("/urls", requestBody);
+            var response = client.post(urlsPath(), requestBody);
 
             assertThat(response.code()).isEqualTo(200);
             assertThat(UrlRepository.findByName("invalid-url")).isNotPresent();
@@ -119,11 +123,11 @@ class AppTest {
     void testCreateDuplicateUrl() {
         JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=https://www.test-duplicate.com";
-            client.post("/urls", requestBody);
+            client.post(urlsPath(), requestBody);
 
             assertThat(UrlRepository.findByName("https://www.test-duplicate.com")).isPresent();
 
-            var response = client.post("/urls", requestBody);
+            var response = client.post(urlsPath(), requestBody);
 
             assertThat(response.code()).isEqualTo(200);
             assertThat(UrlRepository.getAll()).hasSize(1);
@@ -144,11 +148,11 @@ class AppTest {
 
             mockWebServer.enqueue(mockResponse);
 
-            String mockUrlName = mockWebServer.url("/").toString();
+            String mockUrlName = mockWebServer.url(mainPagePath()).toString();
             Url url = new Url(mockUrlName);
             UrlRepository.save(url);
 
-            var response = client.post("/urls/" + url.getId() + "/checks");
+            var response = client.post(urlChecksPath(url.getId()));
 
             assertThat(response.code()).isEqualTo(200);
 
@@ -169,11 +173,11 @@ class AppTest {
 
             mockWebServer.enqueue(mockResponse);
 
-            String mockUrlName = mockWebServer.url("/").toString();
+            String mockUrlName = mockWebServer.url(mainPagePath()).toString();
             Url url = new Url(mockUrlName);
             UrlRepository.save(url);
 
-            var response = client.post("/urls/" + url.getId() + "/checks");
+            var response = client.post(urlChecksPath(url.getId()));
 
             assertThat(response.code()).isEqualTo(200);
 
