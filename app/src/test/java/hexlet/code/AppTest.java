@@ -44,8 +44,14 @@ class AppTest {
     }
 
     @AfterAll
-    static void afterAll() throws IOException {
+    static void afterAll() throws IOException, SQLException {
         mockWebServer.shutdown();
+
+        try (var connection = BaseRepository.dataSource.getConnection();
+             var statement = connection.createStatement()) {
+            statement.execute("DELETE FROM url_checks");
+            statement.execute("DELETE FROM urls");
+        }
     }
 
     @Test

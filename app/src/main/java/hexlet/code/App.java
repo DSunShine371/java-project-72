@@ -59,12 +59,11 @@ public class App {
         if (jdbcUrl == null) {
             log.info("Using H2 database");
             hikariConfig.setJdbcUrl("jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
-            sql = readResourceFile("schema.sql");
         } else {
             log.info("Using Postgres database");
             hikariConfig.setJdbcUrl(jdbcUrl);
-            sql = readResourceFile("schema_pg.sql");
         }
+        sql = readResourceFile("schema.sql");
 
         log.info(sql);
         var dataSource = new HikariDataSource(hikariConfig);
