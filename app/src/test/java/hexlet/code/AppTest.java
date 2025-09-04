@@ -42,8 +42,10 @@ class AppTest {
 
         try (var connection = BaseRepository.dataSource.getConnection();
              var statement = connection.createStatement()) {
-            statement.execute("DELETE FROM url_checks");
-            statement.execute("DELETE FROM urls");
+            statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
+            statement.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
+            statement.execute("TRUNCATE TABLE urls RESTART IDENTITY");
+            statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
         }
     }
 
@@ -53,8 +55,10 @@ class AppTest {
 
         try (var connection = BaseRepository.dataSource.getConnection();
              var statement = connection.createStatement()) {
-            statement.execute("DELETE FROM url_checks");
-            statement.execute("DELETE FROM urls");
+            statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
+            statement.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
+            statement.execute("TRUNCATE TABLE urls RESTART IDENTITY");
+            statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
         }
     }
 
