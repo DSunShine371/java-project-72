@@ -15,7 +15,7 @@ import java.util.Optional;
 public class UrlRepository extends BaseRepository {
     public static void save(Url url) throws SQLException {
         String sql = "INSERT INTO urls (name, created_at) VALUES (?, ?)";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = DATA_SOURCE.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, url.getName());
             stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
@@ -33,7 +33,7 @@ public class UrlRepository extends BaseRepository {
 
     public static Optional<Url> findByName(String name) throws SQLException {
         String sql = "SELECT * FROM urls WHERE name = ? ORDER BY id DESC";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = DATA_SOURCE.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
             try (ResultSet resultSet = stmt.executeQuery()) {
@@ -53,7 +53,7 @@ public class UrlRepository extends BaseRepository {
 
     public static List<Url> getAll() throws SQLException {
         String sql = "SELECT * FROM urls ORDER BY id DESC";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = DATA_SOURCE.getConnection();
              Statement stmt = conn.createStatement()) {
             ResultSet resultSet = stmt.executeQuery(sql);
             List<Url> urls = new ArrayList<>();
@@ -72,7 +72,7 @@ public class UrlRepository extends BaseRepository {
 
     public static Optional<Url> findById(Long id) throws SQLException {
         String sql = "SELECT * FROM urls WHERE id = ? ORDER BY id DESC";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = DATA_SOURCE.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
             try (ResultSet resultSet = stmt.executeQuery()) {

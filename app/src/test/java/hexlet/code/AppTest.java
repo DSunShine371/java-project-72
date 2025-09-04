@@ -25,7 +25,7 @@ import static hexlet.code.util.NamedRoutes.urlPath;
 import static hexlet.code.util.NamedRoutes.urlsPath;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AppTest {
+class AppTest extends BaseRepository {
 
     private Javalin app;
     private static MockWebServer mockWebServer;
@@ -40,7 +40,7 @@ class AppTest {
     final void setUp() throws IOException, SQLException {
         app = App.getApp();
 
-        try (var connection = BaseRepository.dataSource.getConnection();
+        try (var connection = DATA_SOURCE.getConnection();
              var statement = connection.createStatement()) {
             statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
             statement.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
@@ -53,7 +53,7 @@ class AppTest {
     static void afterAll() throws IOException, SQLException {
         mockWebServer.shutdown();
 
-        try (var connection = BaseRepository.dataSource.getConnection();
+        try (var connection = DATA_SOURCE.getConnection();
              var statement = connection.createStatement()) {
             statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
             statement.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");

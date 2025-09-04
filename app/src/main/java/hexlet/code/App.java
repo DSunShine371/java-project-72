@@ -1,11 +1,9 @@
 package hexlet.code;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
-import hexlet.code.repository.BaseRepository;
+import hexlet.code.database.DatabaseInitializer;
 import hexlet.code.controller.UrlController;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
@@ -52,27 +50,10 @@ public class App {
     }
 
     public static Javalin getApp() throws IOException, SQLException {
-        var hikariConfig = new HikariConfig();
-        String jdbcUrl = System.getenv("DATABASE_URL");
-        String sql;
-
-        if (jdbcUrl == null) {
-            log.info("Using H2 database");
-            hikariConfig.setJdbcUrl("jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
-        } else {
-            log.info("Using Postgres database");
-            hikariConfig.setJdbcUrl(jdbcUrl);
-        }
-        sql = readResourceFile("schema.sql");
+        String sql = readResourceFile("schema.sql");
 
         log.info(sql);
-        var dataSource = new HikariDataSource(hikariConfig);
-        try (var connection = dataSource.getConnection();
-             var statement = connection.createStatement()) {
-            statement.execute(sql);
-        }
-
-        BaseRepository.dataSource = dataSource;
+        DatabaseInitializer.initializeSchema(sql);
 
         var app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();

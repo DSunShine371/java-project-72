@@ -17,7 +17,7 @@ public final class UrlCheckRepository extends BaseRepository {
     public static void save(UrlCheck urlCheck) throws SQLException {
         String sql = "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = DATA_SOURCE.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setLong(1, urlCheck.getUrlId());
             stmt.setInt(2, urlCheck.getStatusCode());
@@ -39,7 +39,7 @@ public final class UrlCheckRepository extends BaseRepository {
 
     public static List<UrlCheck> findAllByUrlId(Long urlId) throws SQLException {
         String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY id DESC";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = DATA_SOURCE.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, urlId);
             try (ResultSet resultSet = stmt.executeQuery()) {
@@ -64,7 +64,7 @@ public final class UrlCheckRepository extends BaseRepository {
 
     public static Optional<UrlCheck> findLatestCheckByUrlId(Long urlId) throws SQLException {
         String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC LIMIT 1";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = DATA_SOURCE.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, urlId);
             try (ResultSet rs = stmt.executeQuery()) {
