@@ -30,6 +30,24 @@ class AppTest extends BaseRepository {
     private Javalin app;
     private static MockWebServer mockWebServer;
 
+    private static void cleanDatabase() throws SQLException {
+        String dbProductName;
+        try (var connection = BaseRepository.DATA_SOURCE.getConnection()) {
+            dbProductName = connection.getMetaData().getDatabaseProductName().toLowerCase();
+        }
+        try (var connection = BaseRepository.DATA_SOURCE.getConnection();
+             var statement = connection.createStatement()) {
+            if (dbProductName.contains("postgresql")) {
+                statement.execute("TRUNCATE TABLE url_checks, urls RESTART IDENTITY CASCADE");
+            } else {
+                statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
+                statement.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
+                statement.execute("TRUNCATE TABLE urls RESTART IDENTITY");
+                statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            }
+        }
+    }
+
     @BeforeAll
     static void beforeAll() throws IOException {
         mockWebServer = new MockWebServer();
@@ -39,21 +57,13 @@ class AppTest extends BaseRepository {
     @BeforeEach
     final void setUp() throws IOException, SQLException {
         app = App.getApp();
-
-        try (var connection = DATA_SOURCE.getConnection();
-             var statement = connection.createStatement()) {
-            statement.execute("TRUNCATE TABLE url_checks, urls RESTART IDENTITY CASCADE");
-        }
+        cleanDatabase();
     }
 
     @AfterAll
     static void afterAll() throws IOException, SQLException {
         mockWebServer.shutdown();
-
-        try (var connection = DATA_SOURCE.getConnection();
-             var statement = connection.createStatement()) {
-            statement.execute("TRUNCATE TABLE url_checks, urls RESTART IDENTITY CASCADE");
-        }
+        cleanDatabase();
     }
 
     @Test
