@@ -42,10 +42,7 @@ class AppTest extends BaseRepository {
 
         try (var connection = DATA_SOURCE.getConnection();
              var statement = connection.createStatement()) {
-            statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
-            statement.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
-            statement.execute("TRUNCATE TABLE urls RESTART IDENTITY");
-            statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            statement.execute("TRUNCATE TABLE url_checks, urls RESTART IDENTITY CASCADE");
         }
     }
 
@@ -55,10 +52,7 @@ class AppTest extends BaseRepository {
 
         try (var connection = DATA_SOURCE.getConnection();
              var statement = connection.createStatement()) {
-            statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
-            statement.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
-            statement.execute("TRUNCATE TABLE urls RESTART IDENTITY");
-            statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            statement.execute("TRUNCATE TABLE url_checks, urls RESTART IDENTITY CASCADE");
         }
     }
 
