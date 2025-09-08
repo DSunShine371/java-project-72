@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 import java.util.Optional;
 
 @Data
-public class Url {
+public final class Url {
     private Long id;
     private String name;
     private Timestamp createdAt;

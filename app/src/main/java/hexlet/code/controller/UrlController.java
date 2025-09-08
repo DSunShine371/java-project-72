@@ -28,13 +28,13 @@ import static hexlet.code.util.NamedRoutes.urlPath;
 import static hexlet.code.util.NamedRoutes.urlsPath;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
-public class UrlController {
+public final class UrlController {
 
-    private final String flash = "flash";
+    private static final String FLASH = "flash";
 
     public void showMainPage(Context ctx) {
         var page = new BasePage();
-        page.setFlash(ctx.consumeSessionAttribute(flash));
+        page.setFlash(ctx.consumeSessionAttribute(FLASH));
         ctx.render("index.jte", model("page", page));
     }
 
@@ -42,7 +42,7 @@ public class UrlController {
         String name = ctx.formParam("url");
 
         if (name == null || name.isBlank()) {
-            ctx.sessionAttribute(flash, "URL не может быть пустым");
+            ctx.sessionAttribute(FLASH, "URL не может быть пустым");
             ctx.redirect(mainPagePath());
             return;
         }
@@ -52,15 +52,15 @@ public class UrlController {
             String normalizedUrl = parsedUrl.getProtocol() + "://" + parsedUrl.getAuthority();
 
             if (UrlRepository.findByName(normalizedUrl).isPresent()) {
-                ctx.sessionAttribute(flash, "Страница уже существует");
+                ctx.sessionAttribute(FLASH, "Страница уже существует");
             } else {
                 Url url = new Url(normalizedUrl);
                 UrlRepository.save(url);
-                ctx.sessionAttribute(flash, "Страница успешно добавлена");
+                ctx.sessionAttribute(FLASH, "Страница успешно добавлена");
             }
             ctx.redirect(urlsPath());
         } catch (MalformedURLException | URISyntaxException | SQLException | IllegalArgumentException e) {
-            ctx.sessionAttribute(flash, "Некорректный URL");
+            ctx.sessionAttribute(FLASH, "Некорректный URL");
             ctx.redirect(mainPagePath());
         }
     }
@@ -77,7 +77,7 @@ public class UrlController {
         }
 
         var page = new UrlsPage(urls);
-        page.setFlash(ctx.consumeSessionAttribute(flash));
+        page.setFlash(ctx.consumeSessionAttribute(FLASH));
         ctx.render("urls/index.jte", model("page", page));
     }
 
@@ -87,7 +87,7 @@ public class UrlController {
         if (url.isPresent()) {
             List<UrlCheck> urlChecks = UrlCheckRepository.findAllByUrlId(id);
             var page = new UrlPage(url.get(), urlChecks);
-            page.setFlash(ctx.consumeSessionAttribute(flash));
+            page.setFlash(ctx.consumeSessionAttribute(FLASH));
             ctx.render("urls/show.jte", model("page", page));
         } else {
             throw new NotFoundResponse("URL not found");
@@ -115,11 +115,11 @@ public class UrlController {
             UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, urlId);
             UrlCheckRepository.save(urlCheck);
 
-            ctx.sessionAttribute(flash, "Страница успешно проверена");
+            ctx.sessionAttribute(FLASH, "Страница успешно проверена");
             ctx.redirect(urlPath(urlId));
 
         } catch (Exception e) {
-            ctx.sessionAttribute(flash, "Не удалось проверить страницу");
+            ctx.sessionAttribute(FLASH, "Не удалось проверить страницу");
             ctx.redirect(urlPath(urlId));
         }
     }
