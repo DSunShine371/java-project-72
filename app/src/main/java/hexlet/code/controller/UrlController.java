@@ -9,11 +9,6 @@ import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -24,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static hexlet.code.util.NamedRoutes.mainPagePath;
-import static hexlet.code.util.NamedRoutes.urlPath;
 import static hexlet.code.util.NamedRoutes.urlsPath;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
@@ -91,36 +85,6 @@ public final class UrlController {
             ctx.render("urls/show.jte", model("page", page));
         } else {
             throw new NotFoundResponse("URL not found");
-        }
-    }
-
-    public void indexUrlChecks(Context ctx) throws SQLException {
-        long urlId = ctx.pathParamAsClass("id", Long.class).get();
-        Url url = UrlRepository.findById(urlId)
-                .orElseThrow(() -> new NotFoundResponse("URL не найден"));
-
-        try {
-            HttpResponse<String> response = Unirest.get(url.getName()).asString();
-            Integer statusCode = response.getStatus();
-
-            Document doc = Jsoup.parse(response.getBody());
-            String title = doc.title();
-            String h1 = Optional.ofNullable(doc.selectFirst("h1"))
-                    .map(Element::text)
-                    .orElse("");
-            String description = Optional.ofNullable(doc.selectFirst("meta[name=description]"))
-                    .map(element -> element.attr("content"))
-                    .orElse("");
-
-            UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, urlId);
-            UrlCheckRepository.save(urlCheck);
-
-            ctx.sessionAttribute(FLASH, "Страница успешно проверена");
-            ctx.redirect(urlPath(urlId));
-
-        } catch (Exception e) {
-            ctx.sessionAttribute(FLASH, "Не удалось проверить страницу");
-            ctx.redirect(urlPath(urlId));
         }
     }
 }

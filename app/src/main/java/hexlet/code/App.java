@@ -3,6 +3,7 @@ package hexlet.code;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.controller.UrlChecksController;
 import hexlet.code.database.DatabaseInitializer;
 import hexlet.code.controller.UrlController;
 import io.javalin.Javalin;
@@ -65,11 +66,13 @@ public class App {
         Unirest.config().connectTimeout(10000).socketTimeout(10000);
 
         var urlController = new UrlController();
+        var urlChecksController = new UrlChecksController();
+
         app.get(mainPagePath(), urlController::showMainPage);
         app.post(urlsPath(), urlController::createUrl);
         app.get(urlsPath(), urlController::indexUrls);
         app.get(urlPath("{id}"), urlController::showUrl);
-        app.post(urlChecksPath("{id}"), urlController::indexUrlChecks);
+        app.post(urlChecksPath("{id}"), urlChecksController::indexUrlChecks);
 
         return app;
     }
