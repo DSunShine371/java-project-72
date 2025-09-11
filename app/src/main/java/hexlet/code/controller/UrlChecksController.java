@@ -17,7 +17,7 @@ import java.util.Optional;
 
 import static hexlet.code.util.NamedRoutes.urlPath;
 
-public class UrlChecksController {
+public final class UrlChecksController {
 
     private static final String FLASH = "flash";
 
